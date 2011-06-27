@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+require 'wordnik'
+require 'colored'
+
+# If the command line args are empty, print an error and quit.
+if ARGV.empty?
+  puts "You must pass in a word to look up. e.g. $ lookup cat"
+
+  # Stop the program
+  Process.exit
+else
+  # Readability ftw.
+  word = ARGV[0]
+end
+
+# If -h or --help is passed at the command line, show some documentation
+if ARGV.include? '-h' or ARGV.include? '--help'
+  #TODO Write some help documentation.
+
+  #Stop the program
+  Process.exit
+end
+
+# Configure Wordnik with API, username, etc
+Wordnik.configure do |config|
+    config.api_key = 'your api key here'
+end
+
+# Get word definitions of the argument passed in
+definitions = Wordnik.word.get_definitions word
+
+if definitions.empty?
+  puts "No definitions were found for the word '#{word}'. Please try again."
+
+  # Exit the program
+  Process.exit
+end
+
+# If -e or --examples is passed, show some usage examples
+if ARGV.include? '-e' or ARGV.include? '--examples'
+  examples = Wordnik.word.get_examples ARGV[0]
+  examples = examples['examples']
+end
+
+# Print out the definitions
+puts "Definitions".on_blue
+definitions.each do |definition|
+  puts definition['partOfSpeech'].green + ' - ' + definition['text']
+end
+
+# Print out the examples, if the user wanted any
+if examples
+  puts "Examples".on_blue
+  examples.each do |example|
+    puts example['year'].to_s.blue + ' ' + example['url'].cyan
+    puts example['text'].to_s
+  end
+end
